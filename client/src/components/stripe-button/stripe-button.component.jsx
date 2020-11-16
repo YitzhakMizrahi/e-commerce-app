@@ -30,7 +30,7 @@ const StripeCheckoutButton = ({ price }) => {
   return (
     <StripeCheckout
       label='Pay Now'
-      name='Test E-Commerce Ltd.'
+      name='Commerce GG Ltd.'
       billingAddress
       shippingAddress
       image='https://svgshare.com/i/CUz.svg'
