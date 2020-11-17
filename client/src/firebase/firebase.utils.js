@@ -10,7 +10,6 @@ const config = {
   storageBucket: 'e-commerce-app-b24ca.appspot.com',
   messagingSenderId: '521013936583',
   appId: '1:521013936583:web:3f1f66257a94c47d0799e2',
-  measurementId: 'G-2G41CXCN9S',
 };
 
 firebase.initializeApp(config);
@@ -40,12 +39,24 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
   return userRef;
 };
 
+export const getUserCartRef = async (userId) => {
+  const cartsRef = firestore.collection('carts').where('userId', '==', userId);
+  const snapShot = await cartsRef.get();
+
+  if (snapShot.empty) {
+    const cartDocRef = firestore.collection('carts').doc();
+    await cartDocRef.set({ userId, cartItems: [] });
+    return cartDocRef;
+  } else {
+    return snapShot.docs[0].ref;
+  }
+};
+
 export const addCollectionAndDocuments = async (
   collectionKey,
   objectsToAdd
 ) => {
   const collectionRef = firestore.collection(collectionKey);
-  console.log(collectionRef);
 
   const batch = firestore.batch();
   objectsToAdd.forEach((obj) => {
@@ -56,13 +67,13 @@ export const addCollectionAndDocuments = async (
   return await batch.commit();
 };
 
-export const convertCollectionsSnapshotToMap = (collectionsSnapshot) => {
-  const transformedCollection = collectionsSnapshot.docs.map((docSnapshot) => {
-    const { title, items } = docSnapshot.data();
+export const convertCollectionsSnapshotToMap = (collections) => {
+  const transformedCollection = collections.docs.map((doc) => {
+    const { title, items } = doc.data();
 
     return {
       routeName: encodeURI(title.toLowerCase()),
-      id: docSnapshot.id,
+      id: doc.id,
       title,
       items,
     };
